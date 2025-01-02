@@ -1,0 +1,12 @@
+streamlit
+qdrant-client
+langchain
+langchain-community
+langchain-groq
+sentence-transformers
+logging
+python-dotenv
+langchain_qdrant
+fastembed
+pymongo
+pytz
