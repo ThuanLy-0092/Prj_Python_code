@@ -84,7 +84,6 @@ for message in st.session_state.messages:
     avatar_url = 'https://github.com/ThuanLy-0092/Prj_Python/raw/main/logo.jpg' if message["role"] == "assistant" else 'https://raw.githubusercontent.com/ThuanLy-0092/Sindia_House_Price_Regression/refs/heads/main/user.png'
     with st.chat_message(message["role"], avatar=avatar_url):
         st.markdown(message["content"])
-
 # Streamed response generator with context (chat history)
 def response_generator(prompt):
     try:
