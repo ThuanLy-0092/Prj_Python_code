@@ -8,18 +8,16 @@ from langchain_qdrant import FastEmbedSparse, RetrievalMode
 from langchain.chains.combine_documents import create_stuff_documents_chain
 
 class RAGPipelineSetup:
-    def __init__(self, qdrant_url, qdrant_api_key, qdrant_collection_name, huggingface_api_key, embeddings_model_name, groq_api_key):
+    def __init__(self, qdrant_url, qdrant_api_key, huggingface_api_key, embeddings_model_name, groq_api_key):
         self.QDRANT_URL = qdrant_url
         self.QDRANT_API_KEY = qdrant_api_key
-        self.QDRANT_COLLECTION_NAME = qdrant_collection_name
         self.HUGGINGFACE_API_KEY = huggingface_api_key
         self.EMBEDDINGS_MODEL_NAME = embeddings_model_name
         self.GROQ_API_KEY = groq_api_key
         self.embeddings = self.load_embeddings()
-        self.retriever = self.load_retriever()
         self.pipe = self.load_model_pipeline()
         self.prompt = self.load_prompt_template()
-        self.rag_pipeline = self.load_rag_pipeline(self.pipe, self.retriever, self.prompt)
+        self.current_source = None  # Khởi tạo source hiện tại là None
 
     def load_embeddings(self):
         # Load HuggingFace embeddings
@@ -29,33 +27,33 @@ class RAGPipelineSetup:
         )
         return bge_embeddings
 
-    def load_retriever(self):
-        # Initialize Qdrant client
+    def load_retriever(self, retriever_name):
+        # Khởi tạo Qdrant client
         client = QdrantClient(
             url=self.QDRANT_URL,
             api_key=self.QDRANT_API_KEY,
             prefer_grpc=False
         )
 
-        # Load sparse embedding (for hybrid retrieval)
+        # Load sparse embedding (cho tìm kiếm kết hợp)
         sparse_embeddings = FastEmbedSparse(model_name="Qdrant/bm25")
 
-        # Create vector store for retrieval
+        # Tạo vector store cho truy vấn
         db = QdrantVectorStore(
             client=client,
             embedding=self.embeddings,
             sparse_embedding=sparse_embeddings,
             sparse_vector_name="sparse_vector",
-            collection_name=self.QDRANT_COLLECTION_NAME,
+            collection_name=retriever_name,  # Sử dụng retriever_name (source) làm collection name
             retrieval_mode=RetrievalMode.HYBRID
         )
 
-        # Configure retriever for maximum 5 results with MMR search
+        # Cấu hình retriever để lấy tối đa 5 kết quả với tìm kiếm MMR
         retriever = db.as_retriever(search_kwargs={"k": 5}, search_type="mmr")
         return retriever
 
     def load_model_pipeline(self, max_new_tokens=1024):
-        # Load model from Groq API (as per the provided API key)
+        # Load model từ API Groq (theo API key đã cung cấp)
         llm = ChatGroq(
             temperature=0,
             groq_api_key=self.GROQ_API_KEY,
@@ -63,8 +61,8 @@ class RAGPipelineSetup:
         )
         return llm
 
-    def load_prompt_template(self):
-        # Prompt structure for assistant
+    def load_prompt_template(self, source=None):
+        # Cấu trúc prompt cho assistant
         query_template = '''
         ### Context: 
         {context}
@@ -85,7 +83,7 @@ class RAGPipelineSetup:
         return prompt
 
     def load_rag_pipeline(self, llm, retriever, prompt):
-        # Create a Retrieval Augmented Generation chain
+        # Tạo chuỗi Retrieval Augmented Generation
         rag_chain = create_retrieval_chain(
             retriever=retriever,
             combine_docs_chain=create_stuff_documents_chain(llm, prompt)
@@ -93,12 +91,15 @@ class RAGPipelineSetup:
         
         return rag_chain
 
-    def rag(self, question):
-        # Prepare inputs for the pipeline
-        inputs = {
-            "input": question
-        }
-        
-        # Execute the pipeline with the user question
-        response = self.rag_pipeline.invoke(inputs)
-        return response
+    def rag(self, source):
+        # Nếu source hiện tại chưa được thay đổi, trả về pipeline đã có
+        if source == self.current_source:
+            return self.rag_pipeline
+        else:
+            # Nếu source thay đổi, tái tạo lại các thành phần của pipeline
+            self.retriever = self.load_retriever(retriever_name=source)  # Truyền source làm tên retriever (collection)
+            self.pipe = self.load_model_pipeline()
+            self.prompt = self.load_prompt_template(source)  # Tạo prompt với source
+            self.rag_pipeline = self.load_rag_pipeline(llm=self.pipe, retriever=self.retriever, prompt=self.prompt)
+            self.current_source = source  # Cập nhật source hiện tại
+            return self.rag_pipeline

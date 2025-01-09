@@ -41,21 +41,47 @@ st.markdown(hide_elements_css, unsafe_allow_html=True)
 rag_pipeline_setup = RAGPipelineSetup(
     qdrant_url="https://9ba55ee0-09ef-4c78-8d04-72c6392c0425.us-east4-0.gcp.cloud.qdrant.io",
     qdrant_api_key="GYme2qX9Tzjdl6o-Y4i1ci23mDT_lbLBJ6LAxETpGU7FOVdeaI_T7w",
-    qdrant_collection_name="Python_simple_rag",
     huggingface_api_key="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",
     embeddings_model_name="BAAI/bge-m3",
     groq_api_key="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"
 )
 
+# Định nghĩa ánh xạ giữa lựa chọn cơ sở dữ liệu và tên collection
+database_map = {
+    "database_by_topic": "Python_simple_rag2",  # Mỗi lựa chọn sẽ ánh xạ tới tên collection phù hợp
+    "database_chunksize": "Python_simple_rag"
+}
+
 # Main title
 st.title("Python Simple RAG Assistant")
 
-# Display messages from history with avatars
+# Tạo selectbox trong sidebar để chọn database
+with st.sidebar:
+    st.header("Giới thiệu Sản phẩm")
+    st.write("""
+    **Python Simple RAG Bot** là một ứng dụng chatbot thông minh, kết hợp giữa việc truy xuất dữ liệu và khả năng tạo ra văn bản tự động thông qua công nghệ **Retrieval-Augmented Generation (RAG)**. 
+    Chatbot này giúp người dùng tìm kiếm thông tin và giải đáp các câu hỏi nhanh chóng và hiệu quả.
+    """)
+    
+    st.write("### Nhóm tác giả")
+    st.write("""
+    - **Lý Vĩnh Thuận**
+    - **Nguyễn Nhựt Trường**
+    - **Nguyễn Phạm Anh Văn**
+    """)
+    
+    database_options = list(database_map.keys())  # Lấy danh sách các lựa chọn từ map
+    selected_database = st.selectbox("Chọn cơ sở dữ liệu:", database_options)
+
+# Cập nhật RAG pipeline theo lựa chọn của người dùng
+selected_collection = database_map[selected_database]  # Lấy collection từ map dựa trên lựa chọn của người dùng
+rag_pipeline = rag_pipeline_setup.rag(source=selected_collection)
+
+# Hiển thị các tin nhắn từ lịch sử
 if "messages" not in st.session_state:
     st.session_state.messages = []
-
 for message in st.session_state.messages:
-    avatar_url = 'https://raw.githubusercontent.com/ThuanLy-0092/Sindia_House_Price_Regression/refs/heads/main/logo.jpg' if message["role"] == "assistant" else 'https://raw.githubusercontent.com/ThuanLy-0092/Sindia_House_Price_Regression/refs/heads/main/user.png'
+    avatar_url = 'https://github.com/ThuanLy-0092/Prj_Python/raw/main/logo.jpg' if message["role"] == "assistant" else 'https://raw.githubusercontent.com/ThuanLy-0092/Sindia_House_Price_Regression/refs/heads/main/user.png'
     with st.chat_message(message["role"], avatar=avatar_url):
         st.markdown(message["content"])
 
@@ -63,10 +89,17 @@ for message in st.session_state.messages:
 def response_generator(prompt):
     try:
         start_time = time.time()  # Start timing
-        response = rag_pipeline_setup.rag(prompt)
+        
+        inputs = {"input": prompt}  # Tạo inputs với câu hỏi từ người dùng
+        
+        # Thực thi pipeline
+        response = rag_pipeline.invoke(inputs)  # Lấy kết quả từ pipeline
+
+        # Tính thời gian phản hồi
         end_time = time.time()  # End timing
         elapsed_time = end_time - start_time
-        formatted_response = f"Thời gian phản hồi: {elapsed_time:.2f} giây\n\n{response['answer']}"
+        formatted_response = f"Thời gian phản hồi: {elapsed_time:.2f} giây\n\n{response['answer']}"  # Kết quả trả về từ pipeline
+        
         logger.info(f"Response generated: {formatted_response}")
         return formatted_response
     except Exception as e:
