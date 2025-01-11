@@ -53,9 +53,9 @@ def send_email_notification(user_name, user_email, error_description, error_type
 # Page configuration and layout
 st.set_page_config(
     page_title="Error Report",
-    layout="centered"
+    layout="centered",
+    page_icon="logo.jpg"
 )
-
 # Title for the Error Report page
 st.title("Error Report")
 
