@@ -1,5 +1,4 @@
-# Project Title
-
+# Simple RAG
 This project is focused on developing an advanced chatbot using large language models (LLMs) with sophisticated indexing techniques to improve the quality of responses. The project covers various stages from data crawling, indexing, to evaluation, and aims to optimize the chatbot's ability to handle queries effectively.
 
 ## Table of Contents
