@@ -5,7 +5,7 @@ import logging
 import time
 from Pipeline_Python import RAGPipelineSetup
 
-st.set_page_config(page_title="Python Simple RAG Bot", page_icon="logo.jpg")
+st.set_page_config(page_title="TvT-Bot", page_icon="logo.jpg")
 
 # Cấu hình logging
 logging.basicConfig(level=logging.INFO)
