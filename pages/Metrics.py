@@ -12,8 +12,13 @@ average_metrics_QA1 = QA1[['Precision', 'Recall', 'F1']].mean()
 average_metrics_QA2 = QA2[['Precision', 'Recall', 'F1']].mean()
 
 # Thiết lập giao diện Streamlit
-st.title('Dashboard for Metrics Evaluation')
 
+st.set_page_config(
+    page_title="Dashboard for Metrics Evaluation",
+    layout="centered",
+    page_icon="logo.jpg"
+)
+st.title('Dashboard for Metrics Evaluation')
 st.header('Comparison of Average Metrics')
 
 # Hiển thị các bảng metric trung bình cho cả hai bộ dữ liệu
