@@ -39,11 +39,11 @@ st.markdown(hide_elements_css, unsafe_allow_html=True)
 
 # Khởi tạo đối tượng RAGPipelineSetup
 rag_pipeline_setup = RAGPipelineSetup(
-    qdrant_url="https://9ba55ee0-09ef-4c78-8d04-72c6392c0425.us-east4-0.gcp.cloud.qdrant.io",
-    qdrant_api_key="GYme2qX9Tzjdl6o-Y4i1ci23mDT_lbLBJ6LAxETpGU7FOVdeaI_T7w",
-    huggingface_api_key="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",
-    embeddings_model_name="BAAI/bge-m3",
-    groq_api_key="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"
+    qdrant_url=os.getenv("QDRANT_URL"),
+    qdrant_api_key=os.getenv("QDRANT_API_KEY"),
+    huggingface_api_key=os.getenv("HF_API_KEY"),
+    embeddings_model_name=os.getenv("EMBEDDING"),
+    groq_api_key=os.getenv("GROQ_API_KEY")
 )
 
 # Định nghĩa ánh xạ giữa lựa chọn cơ sở dữ liệu và tên collection
@@ -57,11 +57,8 @@ st.title("Python Simple RAG Assistant")
 
 # Tạo selectbox trong sidebar để chọn database
 with st.sidebar:
-    st.header("Giới thiệu Sản phẩm")
-    st.write("""
-    **Python Simple RAG Bot** là một ứng dụng chatbot thông minh, kết hợp giữa việc truy xuất dữ liệu và khả năng tạo ra văn bản tự động thông qua công nghệ **Retrieval-Augmented Generation (RAG)**. 
-    Chatbot này giúp người dùng tìm kiếm thông tin và giải đáp các câu hỏi nhanh chóng và hiệu quả.
-    """)
+    database_options = list(database_map.keys())  # Lấy danh sách các lựa chọn từ map
+    selected_database = st.selectbox("Chọn cơ sở dữ liệu:", database_options)
     
     st.write("### Nhóm tác giả")
     st.write("""
@@ -69,9 +66,6 @@ with st.sidebar:
     - **Nguyễn Nhựt Trường**
     - **Nguyễn Phạm Anh Văn**
     """)
-    
-    database_options = list(database_map.keys())  # Lấy danh sách các lựa chọn từ map
-    selected_database = st.selectbox("Chọn cơ sở dữ liệu:", database_options)
 
 # Cập nhật RAG pipeline theo lựa chọn của người dùng
 selected_collection = database_map[selected_database]  # Lấy collection từ map dựa trên lựa chọn của người dùng
