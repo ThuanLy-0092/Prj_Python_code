@@ -14,8 +14,8 @@ client = MongoClient("mongodb+srv://Prj_Python:Vinhthuanly123@cluster0.hlb6t.mon
 db = client["Prj_python"]  # Your database name
 error_reports_collection = db["ErrorReportsDB"]
 # Email configuration (set your email and password)
-sender_email = "botwse@gmail.com"
-sender_password = "oguy sfyd bwzj mopj"
+sender_email = os.getenv("SENDER")
+sender_password = os.getenv("SENDERPASS")
 receiver_email = "vinhthuanly210@gmail.com"
 
 # Function to send email notification
