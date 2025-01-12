@@ -116,3 +116,15 @@ Discuss the potential limitations of topic-based indexing when dealing with larg
 Analyze the benefits and drawbacks of indexing based on chunksize for document retrieval.
 
 ---
+
+## Access the Product
+
+To use the product, please visit the following link:
+
+[Product on Render](https://prj-python-code.onrender.com/)
+
+We have an error reporting page available. If you encounter any issues or bugs, feel free to report them, and we will get back to you with a solution. (Database: MongoDB)
+
+You can provide feedback, and we will respond to your queries via your provided email.
+
+Your feedback is valuable to us, and we strive to improve the product continuously.
