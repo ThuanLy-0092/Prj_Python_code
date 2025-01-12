@@ -5,12 +5,8 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import time
 
-# Connect to MongoDB
-# client = MongoClient("mongodb+srv://usdsc91:Vinhthuanly123@cluster0.ydtaq.mongodb.net/")
-# db = client["usdsc91"]  # Your database name
-# error_reports_collection = db["ErrorReportsDB"]  # The collection to store error reports
-
-client = MongoClient("mongodb+srv://Prj_Python:Vinhthuanly123@cluster0.hlb6t.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+mgdb= os.getenv("MONGOCLIENT")
+client = MongoClient(mgdb)
 db = client["Prj_python"]  # Your database name
 error_reports_collection = db["ErrorReportsDB"]
 # Email configuration (set your email and password)
